@@ -49,4 +49,9 @@ function Zerodash:new(opts)
   return zerodash
 end
 
+function Zerodash:setup(opts)
+  local zerodash = Zerodash:new(opts)
+  zerodash.open()
+end
+
 return Zerodash
