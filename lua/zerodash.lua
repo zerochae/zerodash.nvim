@@ -27,24 +27,31 @@ end
 
 local function get_buttons()
   local buttons = {}
+
+  return buttons
 end
 
-local function open()
-  vim.g.nv_previous_buf = vim.api.nvim_get_current_buf()
+local function open(header)
+  return function()
+    vim.g.nv_previous_buf = vim.api.nvim_get_current_buf()
 
-  local buf = vim.api.nvim_create_buf(false, true)
-  local win = vim.api.nvim_get_current_win()
+    local buf = vim.api.nvim_create_buf(false, true)
+    local win = vim.api.nvim_get_current_win()
 
-  vim.api.nvim_win_set_buf(win, buf)
+    vim.api.nvim_win_set_buf(win, buf)
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, header)
+  end
 end
 
 function Zerodash:new(opts)
-  local zerodash = setmetatable({}, Zerodash)
   local header_text = gray_nvim_calvin
+  local zerodash = setmetatable({}, Zerodash)
+
   zerodash.opts = opts
   zerodash.header = get_header(header_text)
   zerodash.buttons = get_buttons()
-  zerodash.open = open()
+  zerodash.open = open(header_text)
 
   return zerodash
 end
