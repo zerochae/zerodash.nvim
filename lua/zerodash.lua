@@ -1,5 +1,3 @@
-local Zerodash = {}
-
 local gray_nvim_calvin = {
   [[                                  ]],
   [[    ┌─┐┬─┐┌─┐┬ ┬   ┌┐┌┬  ┬┬┌┬┐    ]],
@@ -19,7 +17,9 @@ local function get_header(header_text)
   end
 
   add_padding()
-  table.insert(header, header_text)
+  for _, str in ipairs(header_text) do
+    table.insert(header, str)
+  end
   add_padding()
 
   return header
@@ -31,34 +31,49 @@ local function get_buttons()
   return buttons
 end
 
-local function open(header)
-  return function()
-    vim.g.nv_previous_buf = vim.api.nvim_get_current_buf()
+------------------------------------------ Zerodash ------------------------------------------
 
-    local buf = vim.api.nvim_create_buf(false, true)
-    local win = vim.api.nvim_get_current_win()
+---@class Zerodash
+---@field width integer
+---@field opts any
+---@field header table
+---@field buttons any
+---@field max_height any
+local Zerodash = {}
 
-    vim.api.nvim_win_set_buf(win, buf)
+function Zerodash:open()
+  vim.g.nv_previous_buf = vim.api.nvim_get_current_buf()
 
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, header)
+  if self.width + 6 > vim.api.nvim_win_get_width(0) then
+    vim.api.nvim_set_current_win(vim.api.nvim_list_wins()[2])
+    self.win = vim.api.nvim_get_current_win()
   end
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  local win = vim.api.nvim_get_current_win()
+
+  vim.api.nvim_win_set_buf(win, buf)
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, self.header)
 end
 
 function Zerodash:new(opts)
   local header_text = gray_nvim_calvin
-  local zerodash = setmetatable({}, Zerodash)
+  local zerodash_instance = setmetatable(opts, self)
+  self.__index = self
 
-  zerodash.opts = opts
-  zerodash.header = get_header(header_text)
-  zerodash.buttons = get_buttons()
-  zerodash.open = open(header_text)
+  zerodash_instance.header = get_header(header_text)
+  zerodash_instance.buttons = get_buttons()
+  zerodash_instance.width = #zerodash_instance.header[1] + 3
+  zerodash_instance.max_height = #zerodash_instance.header + 4 + (2 * #zerodash_instance.buttons) -- 4  = extra spaces i.e top/bottom
 
-  return zerodash
+  return zerodash_instance
 end
 
 function Zerodash:setup(opts)
-  local zerodash = Zerodash:new(opts)
-  zerodash.open()
+  opts = opts or {}
+  -- local zerodash = Zerodash:new(opts)
+  -- zerodash:open()
 end
 
 return Zerodash
