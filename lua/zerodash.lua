@@ -135,17 +135,7 @@ end
 
 function Zerodash:new(opts)
   local zerodash = setmetatable(opts, self)
-  local header = get_header(opts)
   self.__index = self
-  self.set_buf(self)
-  self.set_win(self)
-  self.set_header(self, header)
-  self.set_buttons(self, opts.buttons)
-  self.set_width(self)
-  self.set_max_height(self)
-  self.set_result(self)
-  self.set_highlight(self, opts.highlight)
-  self.set_opts(self)
 
   return zerodash
 end
@@ -153,7 +143,19 @@ end
 function Zerodash.setup(opts)
   opts = U.merge_tables(default_opts, opts)
 
+  local header = get_header(opts)
   local zerodash = Zerodash:new(opts)
+
+  zerodash:set_buf()
+  zerodash:set_win()
+  zerodash:set_header(header)
+  zerodash:set_buttons(opts.buttons)
+  zerodash:set_width()
+  zerodash:set_max_height()
+  zerodash:set_result()
+  zerodash:set_highlight(opts.highlight)
+  zerodash:set_opts()
+
   zerodash:print()
 end
 
