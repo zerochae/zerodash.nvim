@@ -1,6 +1,6 @@
 # zerodash.nvim
 
-nvim dashboard manager plugin
+minimal nvim dashboard manager plugin
 
 ## 🖥️ Demo
 
