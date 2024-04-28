@@ -1,22 +1,22 @@
 local U = require "util"
 
-local default_opts = {
-  header = {},
-  buttons = {},
-  highlight = {
-    header = {
-      fg = "#519fdf",
-      bg = "none",
-    },
+local function get_default_opts()
+  return {
+    header = {},
+    buttons = {},
+    highlight = {
+      header = {
+        fg = "#519fdf",
+        bg = "none",
+      },
 
-    buttons = {
-      fg = "#8fc6f4",
-      bg = "none",
+      buttons = {
+        fg = "#8fc6f4",
+        bg = "none",
+      },
     },
-  },
-}
-
-local Zerodash = {}
+  }
+end
 
 local function get_header(opts)
   local has_cmd = U.has_cmd(opts.header_cmd)
@@ -34,6 +34,10 @@ local function get_header(opts)
 
   return {}
 end
+
+
+--------------------------------- Zerodash Class ---------------------------------
+local Zerodash = {}
 
 function Zerodash:set_opts()
   vim.opt_local.filetype = "zerodash"
@@ -141,7 +145,7 @@ function Zerodash:new(opts)
 end
 
 function Zerodash.setup(opts)
-  opts = U.merge_tables(default_opts, opts)
+  opts = U.merge_tables(get_default_opts(), opts)
 
   local header = get_header(opts)
   local zerodash = Zerodash:new(opts)
