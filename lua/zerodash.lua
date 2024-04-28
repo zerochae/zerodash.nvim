@@ -15,9 +15,27 @@ local default_opts = {
     [[    └─┘┴└─┴ ┴ ┴    ┘└┘ └┘ ┴┴ ┴    ]],
     [[                                  ]],
   },
+  header_cmd = { "toilet", { "-f", "future" }, "gray-nvim" },
 }
 
 local Zerodash = {}
+
+local function get_header(opts)
+  local has_cmd = U.has_cmd(opts.header_cmd)
+  local cmd_executable = has_cmd and U.is_executable(opts.header_cmd[1])
+
+  if cmd_executable then
+    local cmd = U.make_cmd(opts.header_cmd)
+    local header = vim.fn.systemlist(cmd)
+    return header
+  end
+
+  if opts.header.length ~= 0 then
+    return opts.header
+  end
+
+  return {}
+end
 
 function Zerodash:set_opts()
   vim.opt_local.filetype = "zerodash"
@@ -39,6 +57,8 @@ function Zerodash:set_header(header)
   local emmptyLine = string.rep(" ", vim.fn.strwidth(header[1]))
   table.insert(header, 1, emmptyLine)
   table.insert(header, 2, emmptyLine)
+  table.insert(header, emmptyLine)
+  table.insert(header, emmptyLine)
 
   self.header = header
 end
@@ -100,10 +120,11 @@ end
 
 function Zerodash:new(opts)
   local zerodash = setmetatable(opts, self)
+  local header = get_header(opts)
   self.__index = self
   self.set_buf(self)
   self.set_win(self)
-  self.set_header(self, opts.header)
+  self.set_header(self, header)
   self.set_buttons(self, opts.buttons)
   self.set_width(self)
   self.set_max_height(self)

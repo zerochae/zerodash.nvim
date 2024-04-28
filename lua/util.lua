@@ -16,4 +16,17 @@ M.btn_padding = function(txt1, txt2, header_text)
   return txt1 .. string.rep(" ", spacing - 1) .. txt2 .. " "
 end
 
+M.has_cmd = function(cmd)
+  return cmd ~= nil
+end
+
+M.is_executable = function(module)
+  return vim.fn.executable(module)
+end
+
+M.make_cmd = function(cmd_table)
+  local cmd = table.concat(vim.tbl_flatten(cmd_table), " ")
+  return cmd
+end
+
 return M
