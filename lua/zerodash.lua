@@ -1,79 +1,122 @@
-local gray_nvim_calvin = {
-  [[                                  ]],
-  [[    ┌─┐┬─┐┌─┐┬ ┬   ┌┐┌┬  ┬┬┌┬┐    ]],
-  [[    │ ┬├┬┘├─┤└┬┘───│││└┐┌┘││││    ]],
-  [[    └─┘┴└─┴ ┴ ┴    ┘└┘ └┘ ┴┴ ┴    ]],
-  [[                                  ]],
+local U = require "util"
+
+local default_opts = {
+  buttons = {
+    { "  Find File", "ff", "Telescope find_files" },
+    { "󰈚  Recent Files", "fo", "Telescope oldfiles" },
+    { "  Note", "rg", "Neorg index" },
+    { "  Database", "db", "bd|DBUI" },
+    { "  WorkSpace", "ws", "Telescope workspaces" },
+  },
+  header = {
+    [[                                  ]],
+    [[    ┌─┐┬─┐┌─┐┬ ┬   ┌┐┌┬  ┬┬┌┬┐    ]],
+    [[    │ ┬├┬┘├─┤└┬┘───│││└┐┌┘││││    ]],
+    [[    └─┘┴└─┴ ┴ ┴    ┘└┘ └┘ ┴┴ ┴    ]],
+    [[                                  ]],
+  },
 }
 
-local function get_header(header_text)
-  local header = {}
-
-  local function add_padding()
-    local empty_string = string.rep(" ", vim.fn.strwidth(header_text[1]))
-
-    table.insert(header, empty_string)
-    table.insert(header, empty_string)
-  end
-
-  add_padding()
-  for _, str in ipairs(header_text) do
-    table.insert(header, str)
-  end
-  add_padding()
-
-  return header
-end
-
-local function get_buttons()
-  local buttons = {}
-
-  return buttons
-end
-
------------------------------------------- Zerodash ------------------------------------------
-
----@class Zerodash
----@field width integer
----@field opts any
----@field header table
----@field buttons any
----@field max_height any
 local Zerodash = {}
 
-function Zerodash:open()
-  vim.g.nv_previous_buf = vim.api.nvim_get_current_buf()
+function Zerodash:set_opts()
+  vim.opt_local.filetype = "zerodash"
+end
 
-  if self.width + 6 > vim.api.nvim_win_get_width(0) then
-    vim.api.nvim_set_current_win(vim.api.nvim_list_wins()[2])
-    self.win = vim.api.nvim_get_current_win()
-  end
-
+function Zerodash:set_buf()
   local buf = vim.api.nvim_create_buf(false, true)
+
+  self.buf = buf
+end
+
+function Zerodash:set_win()
   local win = vim.api.nvim_get_current_win()
 
-  vim.api.nvim_win_set_buf(win, buf)
+  self.win = win
+end
 
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, self.header)
+function Zerodash:set_header(header)
+  local emmptyLine = string.rep(" ", vim.fn.strwidth(header[1]))
+  table.insert(header, 1, emmptyLine)
+  table.insert(header, 2, emmptyLine)
+
+  self.header = header
+end
+
+function Zerodash:set_buttons(buttons)
+  self.buttons = buttons or {}
+end
+
+function Zerodash:set_width()
+  local width = #self.header[1] + 3
+
+  self.width = width
+end
+
+function Zerodash:set_max_height()
+  local max_height = #self.header + 4 + (2 * #self.buttons)
+
+  self.max_height = max_height
+end
+
+function Zerodash:get_start_index(dashboard)
+  local index = math.abs(math.floor((vim.api.nvim_win_get_height(self.win) / 2) - (#dashboard / 2))) + 1
+
+  self.start_index = index
+end
+
+function Zerodash:set_result()
+  local result = {}
+  local dashboard = {}
+  local max_height = math.max(vim.api.nvim_win_get_height(self.win), self.max_height)
+
+  for i = 1, max_height do
+    result[i] = ""
+  end
+
+  for _, val in ipairs(self.header) do
+    table.insert(dashboard, val .. " ")
+  end
+
+  for _, val in ipairs(self.buttons) do
+    table.insert(dashboard, U.btn_padding(val[1], val[2], self.header[1]) .. " ")
+    table.insert(dashboard, self.header[1] .. " ")
+  end
+
+  local start_index = U.get_start_index(dashboard, self.win)
+
+  for _, val in ipairs(dashboard) do
+    result[start_index] = U.add_padding(self.win, val)
+    start_index = start_index + 1
+  end
+
+  self.result = result
+end
+
+function Zerodash:print()
+  vim.api.nvim_win_set_buf(self.win, self.buf)
+  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.result)
 end
 
 function Zerodash:new(opts)
-  local header_text = gray_nvim_calvin
-  local zerodash_instance = setmetatable(opts, self)
+  local zerodash = setmetatable(opts, self)
   self.__index = self
+  self.set_buf(self)
+  self.set_win(self)
+  self.set_header(self, opts.header)
+  self.set_buttons(self, opts.buttons)
+  self.set_width(self)
+  self.set_max_height(self)
+  self.set_result(self)
+  self.set_opts(self)
 
-  zerodash_instance.header = get_header(header_text)
-  zerodash_instance.buttons = get_buttons()
-  zerodash_instance.width = #zerodash_instance.header[1] + 3
-  zerodash_instance.max_height = #zerodash_instance.header + 4 + (2 * #zerodash_instance.buttons) -- 4  = extra spaces i.e top/bottom
-
-  return zerodash_instance
+  return zerodash
 end
 
 function Zerodash:setup(opts)
-  opts = opts or {}
-  -- local zerodash = Zerodash:new(opts)
-  -- zerodash:open()
+  opts = opts or default_opts
+  local zerodash = Zerodash:new(opts)
+  zerodash:print()
 end
 
 return Zerodash
