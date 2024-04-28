@@ -1,21 +1,8 @@
 local U = require "util"
 
 local default_opts = {
-  buttons = {
-    { "  Find File", "ff", "Telescope find_files" },
-    { "󰈚  Recent Files", "fo", "Telescope oldfiles" },
-    { "  Note", "rg", "Neorg index" },
-    { "  Database", "db", "bd|DBUI" },
-    { "  WorkSpace", "ws", "Telescope workspaces" },
-  },
-  header = {
-    [[                                  ]],
-    [[    ┌─┐┬─┐┌─┐┬ ┬   ┌┐┌┬  ┬┬┌┬┐    ]],
-    [[    │ ┬├┬┘├─┤└┬┘───│││└┐┌┘││││    ]],
-    [[    └─┘┴└─┴ ┴ ┴    ┘└┘ └┘ ┴┴ ┴    ]],
-    [[                                  ]],
-  },
-  header_cmd = { "toilet", { "-f", "future" }, "gray-nvim" },
+  header = {},
+  buttons = {},
 }
 
 local Zerodash = {}
@@ -134,7 +121,7 @@ function Zerodash:new(opts)
   return zerodash
 end
 
-function Zerodash:setup(opts)
+function Zerodash.setup(opts)
   opts = opts or default_opts
   local zerodash = Zerodash:new(opts)
   zerodash:print()
