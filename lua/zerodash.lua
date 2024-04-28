@@ -2,7 +2,11 @@ local U = require "util"
 
 local function get_default_opts()
   return {
-    header = {},
+    header = {
+      [[     ┏┓╻   ╻ ╻   ╻   ┏┳┓     ]],
+      [[     ┃┗┫   ┃┏┛   ┃   ┃┃┃     ]],
+      [[     ╹ ╹   ┗┛    ╹   ╹ ╹     ]],
+    },
     buttons = {},
     highlight = {
       header = {
