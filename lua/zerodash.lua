@@ -3,6 +3,17 @@ local U = require "util"
 local default_opts = {
   header = {},
   buttons = {},
+  highlight = {
+    header = {
+      fg = "#519fdf",
+      bg = "none",
+    },
+
+    buttons = {
+      fg = "#8fc6f4",
+      bg = "none",
+    },
+  },
 }
 
 local Zerodash = {}
@@ -66,10 +77,12 @@ function Zerodash:set_max_height()
   self.max_height = max_height
 end
 
-function Zerodash:get_start_index(dashboard)
-  local index = math.abs(math.floor((vim.api.nvim_win_get_height(self.win) / 2) - (#dashboard / 2))) + 1
+function Zerodash:set_highlight(highlight)
+  local hi_header = highlight.header
+  local hi_buttons = highlight.buttons
 
-  self.start_index = index
+  vim.cmd("hi ZerodashHeader guifg=" .. hi_header.fg .. " guibg=" .. hi_header.bg)
+  vim.cmd("hi ZerodashButtons guifg=" .. hi_buttons.fg .. " guibg=" .. hi_buttons.bg)
 end
 
 function Zerodash:set_result()
@@ -97,12 +110,27 @@ function Zerodash:set_result()
     start_index = start_index + 1
   end
 
+  self.dashboard = dashboard
   self.result = result
 end
 
 function Zerodash:print()
   vim.api.nvim_win_set_buf(self.win, self.buf)
   vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, self.result)
+
+  local abc = math.abs(math.floor((vim.api.nvim_win_get_height(self.win) / 2) - (#self.dashboard / 2))) + 1
+  local zerodash = vim.api.nvim_create_namespace "zerodash"
+  local horiz_pad_index = math.floor((vim.api.nvim_win_get_width(self.win) / 2) - (self.width / 2)) - 2
+
+  for i = abc, abc + #self.header do
+    vim.api.nvim_buf_add_highlight(self.buf, zerodash, "ZerodashHeader", i, horiz_pad_index, -1)
+  end
+
+  for i = abc + #self.header - 2, abc + #self.result do
+    vim.api.nvim_buf_add_highlight(self.buf, zerodash, "ZerodashButtons", i, horiz_pad_index, -1)
+  end
+
+  vim.api.nvim_win_set_cursor(self.win, { abc + #self.header, math.floor(vim.o.columns / 2) - 13 })
 end
 
 function Zerodash:new(opts)
@@ -116,13 +144,15 @@ function Zerodash:new(opts)
   self.set_width(self)
   self.set_max_height(self)
   self.set_result(self)
+  self.set_highlight(self, opts.highlight)
   self.set_opts(self)
 
   return zerodash
 end
 
 function Zerodash.setup(opts)
-  opts = opts or default_opts
+  opts = U.merge_tables(default_opts, opts)
+
   local zerodash = Zerodash:new(opts)
   zerodash:print()
 end
