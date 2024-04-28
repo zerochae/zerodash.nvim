@@ -35,7 +35,6 @@ local function get_header(opts)
   return {}
 end
 
-
 --------------------------------- Zerodash Class ---------------------------------
 local Zerodash = {}
 
@@ -144,6 +143,7 @@ function Zerodash:new(opts)
   return zerodash
 end
 
+--------------------------------- Setup ---------------------------------
 function Zerodash.setup(opts)
   opts = U.merge_tables(get_default_opts(), opts)
 
