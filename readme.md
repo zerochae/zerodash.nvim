@@ -16,7 +16,8 @@ nvim dashboard manager plugin
     "zerochae/zerodash.nvim",
     event = "BufEnter",
     config = function()
-      require("zerodash").setup()end,
+      require("zerodash").setup()
+    end,
   },
 ```
 
